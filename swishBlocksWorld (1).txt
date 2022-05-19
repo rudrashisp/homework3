@@ -1,0 +1,72 @@
+blocks([a,b,c]).
+% example state of the blocks world
+% [[on, a, b], [on, b, table], [on, c, table], [clear, a], [clear, c]]
+
+% or we can try
+state([on( a, b), on(b, table), on(c, table), clear(a), clear(c)]).
+
+block(X):-blocks(B), member(X,B).
+
+connect(S1,S2) :- member(clear(X), S1), block(X), move(X,Y,Z,S1,S2).
+
+/* move a block from one block onto another block */ 
+move(X, Y, Z, S1, S2) :- 
+      member([clear, Z], S1), 
+      neq(Z, X), 
+      block(Z), 
+      block(Y), 
+      member([on, X, Y], S1), 
+      subs([on, X, Y], S1, [on, X, Z], INTERMEDIATE), 
+      subs([clear, Z], INT, [clear, Y], S2).
+/***************
+/* move a block from one block onto the table */ 
+/* move  a block from the table  onto another block */ 
+
+ /* 
+(subs E1 OLD E2 NEW) holds if NEW is the list OLD in 
+which all occurrences of E1 are substitutes by E2 
+*/ 
+
+((subs _ () _ () )) 
+/* substituting anything in the empty list results in the empty list */
+
+/* 
+substituting the element equal to the head of the list by a new element 
+results in a list whose head is equal to the new element
+and the tail is obtained by substituting all occurrences 
+of elements equal to the "old head" by the new element 
+*/ 
+((subs H (H|T) H2 (H2 | T2)) 
+                       (subs H T H2 T2) 
+                       (!)) 
+/* otherwise */
+((subs H (H1|T1) H2 (H1|T2))
+          (subs H T1 H2 T2))  % in a list with the same head as 
+                                    % the OLD list and a "new" tail, obtained 
+                                    % by the substitution 
+
+
+/* ((del X L1 L2)) holds when L2 is L1 from which X has been deleted */
+
+((del _ () ()))
+((del H (H|T) T))  %(!))
+((del X(H|T) (H|T1))(negg eq X H)(del X T T1))
+
+/* append ...*/
+((append () L L))
+((append (H1|T1) L2 (H1|T))(append T1 L2 T))
+
+((seteq X X))
+((seteq X Y)(mypermutation X Y))
+
+
+((mypermutation () ()))
+((mypermutation L (X|PL))(del X L DL)(mypermutation DL PL))
+
+((genpath  S S PSF (S|PSF)))
+(( genpath  S1 G PSF NEW) (path  S1 S2) 
+    ( genpath  S2 G (S1|PSF) NEW))
+*************************/
+	
+	
+((goal	((clear a) (clear b) (on a table) (on b table) (on c Table) (clear c)) ))
